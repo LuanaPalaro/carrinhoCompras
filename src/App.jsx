@@ -1,28 +1,108 @@
-
+import { useEffect, useState } from 'react';
 import ItemCardapio from './components/ItemCardapio';
 
-// 1. Array com os dados dos produtos
-const bancoDeDados = [
-  { id: 1, nome: "X-Bacon Duplo", descricao: "Duas carnes e muito bacon.", preco: 35.00 },
-  { id: 2, nome: "Pizza Calabresa", descricao: "Tamanho Média 8 pedaços.", preco: 45.00 },
-  { id: 3, nome: "Suco de Laranja", descricao: "Copo 500ml natural.", preco: 8.00 },
-  { id: 4, nome: "Pudim Caseiro", descricao: "Fatia caprichada com calda extra.", preco: 12.00 }
-];
-
 function App() {
-  return (
-    <div>
-      <h1>Senai Delivery</h1>
-      {bancoDeDados.map((item) => (
-        <ItemCardapio
-          key={item.id}
-          nome={item.nome}
-          descricao={item.descricao}
-          preco={item.preco}
-        />
-      ))}
-    </div>
-  );
+    const [itensCarrinho, setItensCarrinho] = useState(0);
+    const [cardapio, setCardapio] = useState([]);
+    const [endereco, setEndereco] = useState('');
+    const [modalAberto, setModalAberto] = useState(false);
+    const [mensagemModal, setMensagemModal] = useState('');
+
+    function finalizarCompra() {
+        if (itensCarrinho === 0) {
+            setMensagemModal('Coloque algo no carrinho!');
+            setModalAberto(true);
+            return;
+        }
+
+        if (endereco === '') {
+            setMensagemModal('Informe o endereço de entrega!');
+            setModalAberto(true);
+            return;
+        }
+
+        setMensagemModal('Pedido finalizado com sucesso!');
+        setModalAberto(true);
+        setItensCarrinho(0);
+        setEndereco('');
+    }
+
+    useEffect(() => {
+        console.log('Conectando ao servidor...');
+        setTimeout(() => {
+            setCardapio([
+                { id: 11, nome: 'Combo Master', descricao: 'Dois lanches + refri 2L', preco: 65.0 },
+
+                {
+                    id: 12,
+                    nome: 'Hambúrguer de Grão de Bico',
+                    descricao: 'Opção Vegana',
+                    preco: 28.0,
+                },
+
+                {
+                    id: 13,
+                    nome: 'Açaí na Tigela',
+                    descricao: '500ml com morango e leite condensado',
+                    preco: 18.0,
+                },
+            ]);
+        }, 2000);
+    }, []);
+
+    if (cardapio.length === 0) {
+        return <h2>Carregando restaurante...</h2>;
+    }
+
+    return (
+        <>
+            {modalAberto && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}>
+                    <div
+                        style={{
+                            padding: '24px',
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+                        }}>
+                        <p>{mensagemModal}</p>
+                        <button onClick={() => setModalAberto(false)}>OK</button>
+                    </div>
+                </div>
+            )}
+            <h1>Senai Delivery</h1>
+            <h3>🛒 Carrinho: {itensCarrinho} itens</h3>
+            {cardapio.map((item) => (
+                <ItemCardapio
+                    key={item.id}
+                    nome={item.nome}
+                    descricao={item.descricao}
+                    preco={item.preco}
+                    adicionarItem={() => setItensCarrinho((itensAtuais) => itensAtuais + 1)}
+                />
+            ))}
+            <div>
+                <h2>Checkout</h2>
+                <input
+                    type="text"
+                    value={endereco}
+                    onChange={(evento) => setEndereco(evento.target.value)}
+                    placeholder="Rua e Número da Entrega"
+                    aria-label="Rua e Número da Entrega"
+                />
+                <button onClick={finalizarCompra}>Finalizar Pedido</button>
+            </div>
+        </>
+    );
 }
 
 export default App;
